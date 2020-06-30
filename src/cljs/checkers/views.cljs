@@ -23,7 +23,7 @@
       (case (:typeOfMove @action_on_click)
         :move (re-frame/dispatch [:move_piece   (:from @action_on_click)  clicked_cell] )
         :capture (re-frame/dispatch [:capture_piece   (:from @action_on_click)  clicked_cell (:captureLocation @action_on_click)])
-        )))) ; TODO refactor action_on_click to return the whole action to be able to process it
+        )))) 
 
 (defn cell [row col]
   (fn []

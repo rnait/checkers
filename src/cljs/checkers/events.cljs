@@ -16,13 +16,20 @@
 (re-frame/reg-event-fx
  :move_piece
  (fn [cofx [_ from to]]
-   (js/console.log (prn-str "move from piece from " from "to " to))
-   {
-    :db (-> (:db cofx)
-            (helpers/move_piece from to)
-            helpers/end_move
-            helpers/change_turn
-            )})) ; TODO: voir comment changer ca si le tour anterieur peut encore bouffer
+   (if (= '() (helpers/possible_captures_all_pieces? (:db cofx)))
+     (doall 
+      (js/console.log (prn-str "move from piece from " from "to " to))
+      {
+       :db (-> (:db cofx)
+               (helpers/move_piece from to)
+               helpers/end_move
+               helpers/change_turn
+               )})
+     (doall 
+      (js/console.log "can't move, capture is mandatory")
+      {
+       :db (:db cofx)
+       })))) 
 (re-frame/reg-event-fx
  :capture_piece 
  (fn [cofx [_ from to captureLoc]]
