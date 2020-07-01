@@ -29,7 +29,23 @@
 (defn add_piece [db pos piece]
   (js/console.log (prn-str "piece " piece "added in " pos))
   (assoc-in db [:board pos] piece))
+(defn opposite_color [color]
+  (case color
+    "w" "b"
+    "b" "w"))
+(defn inc_score [db color change]
+  (let [scoreIndex (case color
+                     "w" 0
+                     "b" 1)]
+    (update-in db [:score scoreIndex] + change)))
 
+(defn inc_score_with_capture [db capturedPieceLoc]
+  (let [capturedPiece (piece? db capturedPieceLoc)
+        capturerColor (opposite_color (:color capturedPiece))
+        points (case (:name capturedPiece)
+                 "p" 1
+                 "q" 10)]
+   (inc_score db capturerColor points)))
 
 (defn change_turn [db]
   (let [current_turn (:turn db)]

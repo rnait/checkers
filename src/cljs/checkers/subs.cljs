@@ -34,6 +34,15 @@
      ["q" "w"] "img/white_queen.svg"
      ["q" "b"] "img/black_queen.svg"
      nil)))
+(re-frame/reg-sub
+ :score
+ (fn [db [_ color]]
+   (let [score (:score db)]
+     (case color
+       "w" (score 0)
+       "b" (score 1))
+     )))
+
 
 
 (re-frame/reg-sub

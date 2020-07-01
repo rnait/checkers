@@ -61,9 +61,11 @@
 (defn main-panel []
   (let [name (re-frame/subscribe [:name])
         myDb (re-frame/subscribe [:db])
-        turn (re-frame/subscribe [:turn])]
+        turn (re-frame/subscribe [:turn])
+        scoreW (re-frame/subscribe [:score "w"])
+        scoreB (re-frame/subscribe [:score "b"])]
     [:div
-     [:h1 "Player turn " (if (= "b" @turn ) "Blacks" "Whites")]
+     [:h1 "Player turn " (if (= "b" @turn) "Blacks" "Whites") " score W: " (prn-str @scoreW) " B: " (prn-str @scoreB)]
      [grid 8]
      [:button
       {:on-click (fn [e]
@@ -73,21 +75,24 @@
      [:button
       {:on-click (fn [e]
                    (js/console.log "boton Clear clicked")
-                   (re-frame/dispatch [:end_move]))
-       }
+                   (re-frame/dispatch [:end_move]))}
       "Clear Temp"]
-         [:button
-          {:on-click (fn [e]
-                       (js/console.log "boton random-event clicked")
-                       (re-frame/dispatch [:random-event]))}
-          "random event"]
-         [:button
-          {:on-click (fn [e]
-                       (js/console.log "boton show_piece_moves clicked")
-                       (re-frame/dispatch [:show_piece_moves]))}
-          "show_piece_moves"]
+     [:button
+      {:on-click (fn [e]
+                   (js/console.log "boton random-event clicked")
+                   (re-frame/dispatch [:random-event]))}
+      "random event"]
+     [:button
+      {:on-click (fn [e]
+                   (js/console.log "boton show_piece_moves clicked")
+                   (re-frame/dispatch [:show_piece_moves]))}
+      "show_piece_moves"]
+     [:button
+      {:on-click (fn [e]
+                   (js/console.log "change score")
+                   (re-frame/dispatch [:inc_score [4 4] ]))}
+      "change score"]
      [:br]
      (prn-str @myDb)
      [:br]
-     (prn-str "all possible captures " (helpers/possible_captures_all_pieces? @myDb ))
-     ]))
+     (prn-str "all possible captures " (helpers/possible_captures_all_pieces? @myDb))]))

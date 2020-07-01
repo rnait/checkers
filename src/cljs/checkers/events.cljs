@@ -37,6 +37,7 @@
    (js/console.log (prn-str "capture " captureLoc " from piece from " from "to " to) )
    {:db 
     (-> (:db cofx)
+        (helpers/inc_score_with_capture captureLoc)
         (helpers/remove_piece captureLoc)
         (helpers/move_piece from to) 
         helpers/end_move
@@ -82,4 +83,8 @@
  (fn [cofx [_]]
    (js/console.log "random event triggered")))
 
-
+(re-frame/reg-event-db
+ :inc_score
+ (fn [db [_ pieceLoc]]
+   (-> db
+       (helpers/inc_score_with_capture pieceLoc))))

@@ -20,6 +20,7 @@
          ))
 (def default-db
   {:name "Checkers"
+   :score [0 0]
    :board (initBoard)
    :temp_layer {}
    :turn "w"
