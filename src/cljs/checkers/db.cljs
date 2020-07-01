@@ -13,7 +13,8 @@
    (->row_of_pawns 7 "w")
    {[3 6] {:color "b", :name "p"}
     [2 2] {:color "w", :name "p"}
-    [4 2] {:color "w", :name "p"}
+    [4 2] {:color "w", :name "q"}
+    [4 4] {:color "w", :name "q"}
     [5 6] {:color "b", :name "p"}}
          ))
 (def default-db

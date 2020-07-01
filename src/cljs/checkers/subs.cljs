@@ -31,6 +31,8 @@
    (case [(:name piece_dict) (:color piece_dict)]
      ["p" "w"] "img/white_pawn.svg"
      ["p" "b"] "img/black_pawn.svg"
+     ["q" "w"] "img/white_queen.svg"
+     ["q" "b"] "img/black_queen.svg"
      nil)))
 
 

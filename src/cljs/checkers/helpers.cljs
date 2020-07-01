@@ -12,7 +12,7 @@
 (defn action_on_click? [db [row col]]
   (get-in db [:moving [row col] ] nil))
 
-(defn empty_cell? [db row col]
+(defn empty_cell? [db [row col]]
   (= nil (piece? db row col)))
 
 (defn remove_piece [db captureLoc]
@@ -41,79 +41,85 @@
              (if (= capture_moves '())
                moves
                capture_moves))))
-(defn build_move_pawnOLD 
-  [db [row col] step]
+
+(defn diag_range [db from move]
+  ;retruns the diagonal between from and to=from+move. 
+  ;If its not a diagonal returns nil. from and to are not included in the list
+  (let [step (mapv #(if (neg? %1) -1 +1) move)
+        to (mapv + from move)
+        abs (fn [n] (max n (- n)))]
+    (if (not= (abs (move 0)) (abs (move 1))) ; not a diagonal
+      nil 
+      (filter #(not (empty_cell? db %1)) ;removes cells that are empty or not valid
+              (apply map #(vector %1 %2) ;equivalent of zip in python
+                     (map #(range %1 %2 %3) (mapv + from step) to step))))))
+
+(defn eval_move [db from move]
   (let [turn (:turn db)
-        oponent  (case turn
-                   "w" "b" 
-                   "b" "w" 
-                   nil)
-        new_pos (mapv + [row col] step)
-        new_jump_pos (mapv + new_pos step)]
-     ;(js/console.log (prn-str "possible move cell " [row col])) ;TODO remove this
-    (cond
-      (not 
-       (or (and (= turn "b") (contains? #{[1 1] [1 -1]} step))
-           (and (= turn "w") (contains? #{[-1 -1] [-1 1]} step)))) nil
-      (empty_cell? db row col) nil ;origin cell is  an empty cell
-      (= oponent (color? db row col)) nil ;origin cell is  a black (resp white) piece while its white's (resp black's) turn
-      (not (valid_pos? new_pos)) nil ;move gets us out of the board
-      (empty_cell? db (new_pos 0) (new_pos 1)) (list {:from [row col]
-                                                      :to new_pos
-                                                      :typeOfMove :move}) ;normal move without capturing
-      (and (= oponent (color? db (new_pos 0) (new_pos 1))) ;move with capturing
-           (valid_pos? new_jump_pos)
-           (empty_cell? db (new_jump_pos 0) (new_jump_pos 1)))  (list    {:from [row col]
-                                                                          :to new_jump_pos
-                                                                          :typeOfMove :capture
-                                                                          :captureLocation new_pos}) ;move with capturing
-      :else nil))
-  
-  )
+        to (mapv + from move)
+        cellsOnDiag (map #(merge {:pos %1}   ((:board db)  %1)) (diag_range db from move))]
+    (cond 
+      (or 
+       (valid_pos? from) (valid_pos? to) ;destination or origin beyond board
+       (not (empty_cell? db to)) ; destination not empty
+       (> 1 (count cellsOnDiag)) ; there is more than one piece on the diagonal
+       ) 
+      nil
+      )
+    ))
 
 (defn possible_moves? ;TODO Corriger  ceci pour que ca montre capture moves en verifiant d'abord si TOUS les mouvements possibles contiennent des capture moves et pas seulement le clicked
   ([db [row col]]
    (let [turn (:turn db)
-             oponent  (case turn
-                        "w" "b"
-                        "b" "w"
-                        nil)]
-    (letfn [
-      (build_pawn_move [db [row col] step]
-             (let [new_pos (mapv + [row col] step)
-                   new_jump_pos (mapv + new_pos step)]
-               (cond
-                 (not
-                  (or (and (= turn "b") (contains? #{[1 1] [1 -1]} step))
-                      (and (= turn "w") (contains? #{[-1 -1] [-1 1]} step)))) nil
-                 (empty_cell? db row col) nil ;origin cell is  an empty cell
-                 (= oponent (color? db row col)) nil ;origin cell is  a black (resp white) piece while its white's (resp black's) turn
-                 (not (valid_pos? new_pos)) nil ;move gets us out of the board
-                 (empty_cell? db (new_pos 0) (new_pos 1)) (list {:from [row col]
-                                                                 :to new_pos
-                                                                 :typeOfMove :move}) ;normal move without capturing
-                 (and (= oponent (color? db (new_pos 0) (new_pos 1))) ;move with capturing
-                      (valid_pos? new_jump_pos)
-                      (empty_cell? db (new_jump_pos 0) (new_jump_pos 1)))  (list    {:from [row col]
-                                                                                     :to new_jump_pos
-                                                                                     :typeOfMove :capture
-                                                                                     :captureLocation new_pos}) ;move with capturing
-                 :else nil)))
-      (build_king_move [db [row col] step]
-        (let [end_pos (mapv + [row col] step)]
-          (if (or (empty_cell? db row col) ;origin cell is  an empty cell
-                  (= oponent (color? db row col)) ;origin cell is  a black (resp white) piece while its white's (resp black's) turn
-                  (not (valid_pos? end_pos))) ;move gets us out of the board
-            nil
-            nil; TODO : complete the function here. Generate the cell positions between [row col] and
+         oponent  (case turn
+                    "w" "b"
+                    "b" "w"
+                    nil)]
+    (letfn [(build_pawn_move [db [row col] step]
+              (let [new_pos (mapv + [row col] step)
+                    new_jump_pos (mapv + new_pos step)]
+                (cond
+                  (not
+                   (or (and (= turn "b") (contains? #{[1 1] [1 -1]} step))
+                       (and (= turn "w") (contains? #{[-1 -1] [-1 1]} step)))) nil
+                  (empty_cell? db [row col]) nil ;origin cell is  an empty cell
+                  (= oponent (color? db row col)) nil ;origin cell is  a black (resp white) piece while its white's (resp black's) turn
+                  (not (valid_pos? new_pos)) nil ;move gets us out of the board
+                  (empty_cell? db  new_pos) (list {:from [row col]
+                                                                  :to new_pos
+                                                                  :typeOfMove :move}) ;normal move without capturing
+                  (and (= oponent (color? db (new_pos 0) (new_pos 1))) ;move with capturing
+                       (valid_pos? new_jump_pos)
+                       (empty_cell? db  new_jump_pos))  (list    {:from [row col]
+                                                                                      :to new_jump_pos
+                                                                                      :typeOfMove :capture
+                                                                                      :captureLocation new_pos}) ;move with capturing
+                  :else nil)))
+            (build_move [db [row col] step]
+              (let [end_pos (mapv + [row col] step)]
+                (if (or (empty_cell? db [row col]) ;origin cell is  an empty cell
+                        (= oponent (color? db row col)) ;origin cell is  a black (resp white) piece while its white's (resp black's) turn
+                        (not (valid_pos? end_pos))) ;move gets us out of the board
+                  nil
+                  nil
+                  
+                  
+                  
+                  ; TODO : complete the function here. Generate the cell positions between [row col] and
             ; end_pos. The direction is given by (mapv sign step)
             ; create a list of the positions between beginning of move and and of move
             ; than map this list to empty to a dict of {piece, color}. If there is only one enemy piece than its
             ; capturable otherwise if its completely empty then it's movable. Otherwise returns nil
-            )))]
-     
-      (mapcat #(build_pawn_move db [row col] %1) '([1 1] [1 -1] [-1 -1] [-1 1]))
-      )))
+                  )))]
+
+
+(case [turn (piece? db row col)]
+  ["w" {:color "w" :name "p"}] (mapcat #(build_pawn_move db [row col] %1) '( [-1 -1] [-1 1]))
+  ["b" {:color "b" :name "p"}] (mapcat #(build_pawn_move db [row col] %1) '([1 1] [1 -1] ))
+  ["w" {:color "w" :name "q"}] (mapcat #(build_move db [row col] %1) '([-3 -3] [-2 -2] [-1 -1] [-1 1] [-2 2] [-3 3]))
+  nil
+  )      
+)))
  
   )
 
