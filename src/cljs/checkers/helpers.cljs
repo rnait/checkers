@@ -167,13 +167,19 @@
   (->> (:board db)
        (map (fn [[k _]] k))
        (map #(possible_moves? db %1))
-       flatten))
+       flatten
+       (filter #(not= nil %1)) ))
 (defn possible_captures_all_pieces?
   [db]
   (->> db
        possible_moves_all_pieces?
        (filter #(= :capture (:typeOfMove %1)))))
-
+(defn all_possible_moves_or_only_captures 
+  [db]
+  (let [captures (possible_captures_all_pieces? db)]
+    (if (= captures '())
+      (possible_moves_all_pieces? db)
+      captures)))
 (defn show_moves [db moves]
   (let [allCaptures (possible_captures_all_pieces? db)
         ;moves (if (= allCaptures '())
