@@ -1,19 +1,26 @@
 (ns checkers.helpers)
 
-(defn piece? [db row col]
+(defonce whiteFinishLine 
+  #{[0 0] [0 1] [0 2] [0 3] [0 4] [0 5] [0 6] [0 7]})
+(defonce blackFinishLine
+  #{[7 0] [7 1] [7 2] [7 3] [7 4] [7 5] [7 6] [7 7]})
+(defn mapmap [m f] ;apply map on a hashmap and return a hashmap
+  (into {} (for [[k v] m] [k (f k v)])))
+
+(defn piece? [db [row col]]
   (get-in db [:board [row col]] nil))
 
 (defn valid_pos? [[row col]]
   (and (>= row 0) (<= row 7) (>= col 0) (<= col 7)))
 
-(defn color? [db row col]
+(defn color? [db [row col]]
   (get-in db [:board [row col] :color] nil))
 
 (defn action_on_click? [db [row col]]
   (get-in db [:moving [row col] ] nil))
 
 (defn empty_cell? [db [row col]]
-  (= nil (piece? db row col)))
+  (= nil (piece? db [row col])))
 
 (defn remove_piece [db captureLoc]
   (js/console.log (prn-str "remove piece " captureLoc ))
@@ -36,37 +43,20 @@
       (assoc-in  [:temp_layer] {})
       (assoc-in  [:moving] {})
       ))
-(comment (defn prevent_noncapture_moves [moves] ;TODO: remove the need for this. possible_moves? Should return explicitly all moves. Filter should be elsewhere
-           (let [capture_moves (filter (fn [elt] (= (:typeOfMove elt) :capture)) moves)]
-             (if (= capture_moves '())
-               moves
-               capture_moves))))
-
+(defn abs [n] (max n (- n)))
 (defn diag_range [db from move]
   ;retruns the diagonal between from and to=from+move. 
   ;If its not a diagonal returns nil. from and to are not included in the list
   (let [step (mapv #(if (neg? %1) -1 +1) move)
         to (mapv + from move)
-        abs (fn [n] (max n (- n)))]
+        ]
     (if (not= (abs (move 0)) (abs (move 1))) ; not a diagonal
       nil 
       (filter #(not (empty_cell? db %1)) ;removes cells that are empty or not valid
               (apply map #(vector %1 %2) ;equivalent of zip in python
                      (map #(range %1 %2 %3) (mapv + from step) to step))))))
 
-(defn eval_move [db from move]
-  (let [turn (:turn db)
-        to (mapv + from move)
-        cellsOnDiag (map #(merge {:pos %1}   ((:board db)  %1)) (diag_range db from move))]
-    (cond 
-      (or 
-       (valid_pos? from) (valid_pos? to) ;destination or origin beyond board
-       (not (empty_cell? db to)) ; destination not empty
-       (> 1 (count cellsOnDiag)) ; there is more than one piece on the diagonal
-       ) 
-      nil
-      )
-    ))
+
 
 (defn possible_moves? ;TODO Corriger  ceci pour que ca montre capture moves en verifiant d'abord si TOUS les mouvements possibles contiennent des capture moves et pas seulement le clicked
   ([db [row col]]
@@ -75,48 +65,47 @@
                     "w" "b"
                     "b" "w"
                     nil)]
-    (letfn [(build_pawn_move [db [row col] step]
-              (let [new_pos (mapv + [row col] step)
-                    new_jump_pos (mapv + new_pos step)]
-                (cond
-                  (not
-                   (or (and (= turn "b") (contains? #{[1 1] [1 -1]} step))
-                       (and (= turn "w") (contains? #{[-1 -1] [-1 1]} step)))) nil
-                  (empty_cell? db [row col]) nil ;origin cell is  an empty cell
-                  (= oponent (color? db row col)) nil ;origin cell is  a black (resp white) piece while its white's (resp black's) turn
-                  (not (valid_pos? new_pos)) nil ;move gets us out of the board
-                  (empty_cell? db  new_pos) (list {:from [row col]
-                                                                  :to new_pos
-                                                                  :typeOfMove :move}) ;normal move without capturing
-                  (and (= oponent (color? db (new_pos 0) (new_pos 1))) ;move with capturing
-                       (valid_pos? new_jump_pos)
-                       (empty_cell? db  new_jump_pos))  (list    {:from [row col]
-                                                                                      :to new_jump_pos
-                                                                                      :typeOfMove :capture
-                                                                                      :captureLocation new_pos}) ;move with capturing
-                  :else nil)))
-            (build_move [db [row col] step]
-              (let [end_pos (mapv + [row col] step)]
-                (if (or (empty_cell? db [row col]) ;origin cell is  an empty cell
-                        (= oponent (color? db row col)) ;origin cell is  a black (resp white) piece while its white's (resp black's) turn
-                        (not (valid_pos? end_pos))) ;move gets us out of the board
-                  nil
-                  nil
-                  
-                  
-                  
-                  ; TODO : complete the function here. Generate the cell positions between [row col] and
-            ; end_pos. The direction is given by (mapv sign step)
-            ; create a list of the positions between beginning of move and and of move
-            ; than map this list to empty to a dict of {piece, color}. If there is only one enemy piece than its
-            ; capturable otherwise if its completely empty then it's movable. Otherwise returns nil
-                  )))]
+    (letfn [(eval_move [db from move]
+                       (let [turn (:turn db)
+                             to (mapv + from move)
+                             cellsOnDiag (map #(merge {:pos %1}   ((:board db)  %1)) (diag_range db from move))]
+    ;(js/console.log (prn-str "cellsOnDiag " cellsOnDiag))
+                         (cond
+                           (or
+                            (not (valid_pos? from)) (not (valid_pos? to)) ;destination or origin beyond board
+                            (not (empty_cell? db to)) ; destination not empty
+                            (> (count cellsOnDiag) 1) ; there is more than one piece on the diagonal
+                            (and (= "p" (:name (piece? db from)))
+                                 (= 0 (count cellsOnDiag))
+                                 (not= [1 1] (mapv abs move)) ;prevent moves of pawns bigger than 1 step
+                                 ))nil
+      ;(js/console.log (prn-str "1 " (valid_pos? from) "2 " (not (valid_pos? to)) "3 " (> 1 (count cellsOnDiag)) ) )
+                           ;from here there cellsOnDiag has 0 or one element
+                           (= 0 (count cellsOnDiag))
+                           (list {:from from
+                                  :to to
+                                  :typeOfMove :move}) ;free way to move
+                           (= oponent (:color (first cellsOnDiag)))
+                           (list    {:from from
+                                     :to to
+                                     :typeOfMove :capture
+                                     :captureLocation (:pos (first cellsOnDiag))}) ;move with capturing
+                           )))
+            (move_black_pawn [] (mapcat #(eval_move db [row col] %1) '([1 1] [1 -1] [2 2] [2 -2])))
+            (move_white_pawn [] (mapcat #(eval_move db [row col] %1) '([-1 -1] [-1 1] [-2 -2] [-2 2])))
+            (move_queen [] (mapcat #(eval_move db [row col] %1)
+                                   (mapcat #(list (vector %1 %1)
+                                                  (vector (- %1) %1)
+                                                  (vector %1 (- %1))
+                                                  (vector (- %1) (- %1)))
+                                           (range 1 8))))]
 
-
-(case [turn (piece? db row col)]
-  ["w" {:color "w" :name "p"}] (mapcat #(build_pawn_move db [row col] %1) '( [-1 -1] [-1 1]))
-  ["b" {:color "b" :name "p"}] (mapcat #(build_pawn_move db [row col] %1) '([1 1] [1 -1] ))
-  ["w" {:color "w" :name "q"}] (mapcat #(build_move db [row col] %1) '([-3 -3] [-2 -2] [-1 -1] [-1 1] [-2 2] [-3 3]))
+;(js/console.log (mapcat #(eval_move db [row col] %1) '([-1 -1] [-1 1] [1 1] [1 -1])))
+(case [turn (piece? db [row col])]
+  ["w" {:color "w" :name "p"}] (move_white_pawn)
+  ["b" {:color "b" :name "p"}] (move_black_pawn)
+  ["w" {:color "w" :name "q"}] (move_queen)
+  ["b" {:color "b" :name "q"}] (move_queen)
   nil
   )      
 )))
@@ -154,7 +143,7 @@
                          moves))))
 (defn move_piece [db from to]
   (-> db
-   (add_piece to (piece? db (from 0) (from 1)))
+   (add_piece to (piece? db from ))
    (remove_piece from)))
 
 (defn possible_moves_all_pieces?
@@ -193,3 +182,13 @@
     (if (= '() captures)
       (change_turn db)
       (show_moves db captures))))
+(defn is_crownable? [pos piece]
+  (or
+   (and (= piece {:name "p" :color "w"}) (contains? whiteFinishLine pos))
+   (and (= piece  {:name "p" :color "b"}) (contains? blackFinishLine pos)))
+  )
+(defn switch_pawns_to_queens [db]
+  (assoc-in db [:board]
+            (mapmap (:board db)  (fn [pos piece]
+                                   (if (is_crownable? pos piece) {:name "q" :color (:color piece)}
+                                       piece)))))

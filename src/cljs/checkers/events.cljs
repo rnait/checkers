@@ -24,6 +24,7 @@
                (helpers/move_piece from to)
                helpers/end_move
                helpers/change_turn
+               helpers/switch_pawns_to_queens
                )})
      (doall 
       (js/console.log "can't move, capture is mandatory")
@@ -40,6 +41,7 @@
         (helpers/move_piece from to) 
         helpers/end_move
         helpers/change_turn_or_show_mandatory_capture
+        helpers/switch_pawns_to_queens
         )} 
    ))
 

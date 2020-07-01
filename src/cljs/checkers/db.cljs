@@ -11,16 +11,17 @@
    (->row_of_pawns 1 "b")
    (->row_of_pawns 6 "w")
    (->row_of_pawns 7 "w")
-   {[3 6] {:color "b", :name "p"}
-    [2 2] {:color "w", :name "p"}
-    [4 2] {:color "w", :name "q"}
+   {;[3 6] {:color "b", :name "p"}
+    ;[2 2] {:color "w", :name "p"}
+    ;[4 2] {:color "w", :name "q"}
     [4 4] {:color "w", :name "q"}
-    [5 6] {:color "b", :name "p"}}
+    ;[5 6] {:color "b", :name "p"}
+    }
          ))
 (def default-db
-  {:name "re-frame"
+  {:name "Checkers"
    :board (initBoard)
-   :temp_layer {[1 1] #{:is-capture-jump}}
+   :temp_layer {}
    :turn "w"
    :moving {}
    })

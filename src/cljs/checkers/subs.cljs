@@ -21,7 +21,7 @@
 (re-frame/reg-sub
  :piece
  (fn [db [_ row col]]
-   (helpers/piece? db row col)))
+   (helpers/piece? db [row col])))
 
 (re-frame/reg-sub
  :piece_image
