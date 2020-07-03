@@ -199,11 +199,12 @@
     ))
 
 
-(defn change_turn_or_show_mandatory_capture [db]
+(defn change_turn_or_show_mandatory_capture [db capturerPos]
   (let [captures (possible_captures_all_pieces? db)]
-    (if (= '() captures)
+    (if (contains? (into #{} (map :from captures)) capturerPos) ;avoids continuing the capture if the capture available is for another piece than the last one that captured
+      (show_moves db captures)
       (change_turn db)
-      (show_moves db captures))))
+      )))
 (defn is_crownable? [pos piece]
   (or
    (and (= piece {:name "p" :color "w"}) (contains? whiteFinishLine pos))

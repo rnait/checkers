@@ -21,7 +21,7 @@
               helpers/end_move
               helpers/change_turn
               helpers/switch_pawns_to_queens)
-      :dispatch [:auto-play "b"]})
+      :dispatch [:auto-play "w"]})
     (doall
      (js/console.log "can't move, capture is mandatory")
      {:db (:db cofx)}))
@@ -31,24 +31,35 @@
  (fn [cofx [_ from to]]
    (move_piece_handler cofx from to)
    )) 
-(defn capture_piece_handler [db from to captureLoc] 
-      (-> db
-          (helpers/inc_score_with_capture captureLoc)
-          (helpers/remove_piece captureLoc)
-          (helpers/move_piece from to)
-          helpers/end_move
-          helpers/change_turn_or_show_mandatory_capture
-          helpers/switch_pawns_to_queens)
+(defn capture_piece_handler [cofx from to captureLoc] 
+  {:db 
+   (-> (:db cofx)
+       (helpers/inc_score_with_capture captureLoc)
+       (helpers/remove_piece captureLoc)
+       (helpers/move_piece from to)
+       helpers/end_move
+       (helpers/change_turn_or_show_mandatory_capture to)
+       helpers/switch_pawns_to_queens)
+   :dispatch [:auto-play "w"]}
   )
+
 (re-frame/reg-event-fx
  :capture_piece 
  (fn [cofx [_ from to captureLoc]]
-   (js/console.log (prn-str "capture " captureLoc " from piece from " from "to " to) )
-   {:db 
-    (capture_piece_handler (:db cofx) from to captureLoc       )
-    :dispatch [:auto-play "b"]} 
+   (js/console.log (prn-str "capture " captureLoc " from piece from " from "to " to) )    
+   (capture_piece_handler cofx from to captureLoc       )   
    ))
-
+(defn exectute_move [cofx move]
+  (let [{from :from 
+         to :to
+         captureLocation :captureLocation} move]
+    (case (:typeOfMove move)
+      :move (move_piece_handler cofx from to) 
+      :capture (capture_piece_handler cofx from to captureLocation) )))
+(re-frame/reg-event-fx
+ :execute_move
+ (fn [cofx [_ move]]
+   (exectute_move cofx move)))
 (re-frame/reg-event-db
  :show_piece_moves
  (fn [db [_ row col ]]
@@ -113,3 +124,13 @@
        {:dispatch move_event
         })
      )))
+
+(re-frame/reg-event-db 
+ :add_piece 
+ (fn [db [_ pos piece]]
+   (helpers/add_piece db pos piece)))
+
+(re-frame/reg-event-db
+ :remove_piece
+ (fn [db [_ pos ]]
+   (helpers/remove_piece db pos)))

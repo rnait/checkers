@@ -20,10 +20,7 @@
     (js/console.log (prn-str "clicked " @action_on_click))
     (if (= nil @action_on_click)
       (re-frame/dispatch [:show_piece_moves  row col])
-      (case (:typeOfMove @action_on_click)
-        :move (re-frame/dispatch [:move_piece   (:from @action_on_click)  clicked_cell] )
-        :capture (re-frame/dispatch [:capture_piece   (:from @action_on_click)  clicked_cell (:captureLocation @action_on_click)])
-        )))) 
+      (re-frame/dispatch [:execute_move @action_on_click])))) 
 
 (defn cell [row col]
   (fn []
