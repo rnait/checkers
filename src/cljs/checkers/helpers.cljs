@@ -1,5 +1,6 @@
 (ns checkers.helpers)
 
+
 (defonce whiteFinishLine 
   #{[0 0] [0 1] [0 2] [0 3] [0 4] [0 5] [0 6] [0 7]})
 (defonce blackFinishLine
@@ -23,12 +24,17 @@
   (= nil (piece? db [row col])))
 
 (defn remove_piece [db captureLoc]
-  (js/console.log (prn-str "remove piece " captureLoc ))
+  ;(js/console.log (prn-str "remove piece " captureLoc ))
   (update-in db [:board] dissoc captureLoc))
 
 (defn add_piece [db pos piece]
-  (js/console.log (prn-str "piece " piece "added in " pos))
+  ;(js/console.log (prn-str "piece " piece "added in " pos))
   (assoc-in db [:board pos] piece))
+(defn is_crownable? [pos piece]
+  (or
+   (and (= piece {:name "p" :color "w"}) (contains? whiteFinishLine pos))
+   (and (= piece  {:name "p" :color "b"}) (contains? blackFinishLine pos))))
+
 (defn opposite_color [color]
   (case color
     "w" "b"
@@ -157,10 +163,16 @@
                              nil)
                            )
                          moves))))
+(defn inc_score_if_crownable [db pos]
+  (if  (is_crownable? pos (piece? db pos))
+    (inc_score db (color? db pos) 10)
+    db))
 (defn move_piece [db from to]
   (-> db
-   (add_piece to (piece? db from ))
-   (remove_piece from)))
+      (add_piece to (piece? db from))
+      (remove_piece from)
+      (inc_score_if_crownable to)
+))
 
 (defn possible_moves_all_pieces?
   [db]
@@ -182,9 +194,6 @@
       captures)))
 (defn show_moves [db moves]
   (let [allCaptures (possible_captures_all_pieces? db)
-        ;moves (if (= allCaptures '())
-        ;        moves
-        ;        (filter (fn [elt] (= (:typeOfMove elt) :capture)) moves))
         ]
     
     (if (= moves '())
@@ -205,13 +214,10 @@
       (show_moves db captures)
       (change_turn db)
       )))
-(defn is_crownable? [pos piece]
-  (or
-   (and (= piece {:name "p" :color "w"}) (contains? whiteFinishLine pos))
-   (and (= piece  {:name "p" :color "b"}) (contains? blackFinishLine pos)))
-  )
+
 (defn switch_pawns_to_queens [db]
-  (assoc-in db [:board]
-            (mapmap (:board db)  (fn [pos piece]
-                                   (if (is_crownable? pos piece) {:name "q" :color (:color piece)}
-                                       piece)))))
+  (-> db 
+      (assoc-in  [:board]
+                (mapmap (:board db)  (fn [pos piece]
+                                       (if (is_crownable? pos piece) {:name "q" :color (:color piece)}
+                                           piece))))))

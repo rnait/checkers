@@ -1,7 +1,7 @@
 (ns checkers.subs
   (:require
    [re-frame.core :as re-frame]
-   [day8.re-frame.tracing :refer-macros [fn-traced]]
+   ;[day8.re-frame.tracing :refer-macros [fn-traced]]
    [checkers.helpers :as helpers]))
 
 (re-frame/reg-sub

@@ -23,6 +23,6 @@
    :score [0 0]
    :board (initBoard)
    :temp_layer {}
-   :turn "b"
+   :turn "w"
    :moving {}
    })
