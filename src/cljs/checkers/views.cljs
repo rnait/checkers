@@ -19,8 +19,11 @@
         action_on_click (re-frame/subscribe [:action_on_click? clicked_cell])]
     (js/console.log (prn-str "clicked " @action_on_click))
     (if (= nil @action_on_click)
-      (re-frame/dispatch [:show_piece_moves  row col])
-      (re-frame/dispatch [:execute_move @action_on_click])))) 
+      (re-frame/dispatch ^:flush-dom [:show_piece_moves  row col])
+      (re-frame/dispatch ^:flush-dom [:execute_move @action_on_click])
+      )
+    )) 
+
 
 (defn cell [row col]
   (fn []
@@ -42,7 +45,7 @@
   ;(js/console.log "in the for " (prn-str "l: " l))
   ;(map #(re-frame/dispatch [:make_cell_movable (%1 0) (%1  1)]) l)
   (doall (for [cell l]
-           (re-frame/dispatch [:make_cell_movable (cell 0) (cell  1)])
+           (re-frame/dispatch ^:flush-dom [:make_cell_movable (cell 0) (cell  1)])
            ;(js/console.log (prn-str "cell: " cell))
            ))
   )
@@ -72,22 +75,22 @@
      [:button
       {:on-click (fn [e]
                    (js/console.log "boton Clear clicked")
-                   (re-frame/dispatch [:end_move]))}
+                   (re-frame/dispatch ^:flush-dom [:end_move]))}
       "Clear Temp"]
      [:button
       {:on-click (fn [e]
                    (js/console.log "boton random-event clicked")
-                   (re-frame/dispatch [:random-event]))}
+                   (re-frame/dispatch ^:flush-dom [:random-event]))}
       "random event"]
      [:button
       {:on-click (fn [e]
                    (js/console.log "boton show_piece_moves clicked")
-                   (re-frame/dispatch [:show_piece_moves]))}
+                   (re-frame/dispatch ^:flush-dom [:show_piece_moves]))}
       "show_piece_moves"]
      [:button
       {:on-click (fn [e]
                    (js/console.log "change score")
-                   (re-frame/dispatch [:inc_score [4 4] ]))}
+                   (re-frame/dispatch ^:flush-dom [:inc_score [4 4] ]))}
       "change score"]
      [:br]
      (prn-str @myDb)

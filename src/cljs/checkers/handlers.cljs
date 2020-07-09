@@ -13,8 +13,9 @@
        (helpers/move_piece from to)
        helpers/end_move
        (helpers/change_turn_or_show_mandatory_capture to)
-       helpers/switch_pawns_to_queens)
-   :dispatch [:auto-play "b"]})
+       helpers/switch_pawns_to_queens
+       (helpers/update_last_move :capture))
+   :dispatch ^:flush-dom [:auto-play "b"]})
 
 (defn move_piece_handler [cofx from to]
   (if (= '() (helpers/possible_captures_all_pieces? (:db cofx)))
@@ -24,8 +25,11 @@
               (helpers/move_piece from to)
               helpers/end_move
               helpers/change_turn
-              helpers/switch_pawns_to_queens)
-      :dispatch [:auto-play "b"]})
+              helpers/switch_pawns_to_queens
+              (helpers/update_last_move :move)
+              )
+      :dispatch ^:flush-dom [:auto-play "b"]
+      })
     (doall
      ;(js/console.log "can't move, capture is mandatory")
      {:db (:db cofx)})))

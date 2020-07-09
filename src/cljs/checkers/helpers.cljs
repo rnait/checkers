@@ -65,6 +65,9 @@
       (assoc-in  [:temp_layer] {})
       (assoc-in  [:moving] {})
       ))
+(defn update_last_move [db move_name]
+  (-> db
+      (assoc-in  [:last_move] move_name)))
 (defn abs [n] (max n (- n)))
 (defn diag_range [db from move]
   ;retruns the diagonal between from and to=from+move. 
@@ -171,7 +174,7 @@
   (-> db
       (add_piece to (piece? db from))
       (remove_piece from)
-      (inc_score_if_crownable to)
+      ;(inc_score_if_crownable to)
 ))
 
 (defn possible_moves_all_pieces?
