@@ -7,7 +7,8 @@
                  [thheller/shadow-cljs "2.9.3"]
                  [reagent "0.10.0"]
                  [re-frame "0.12.0"]
-                 [day8.re-frame/tracing "0.5.5"]]
+                 [day8.re-frame/tracing "0.5.5"]
+                 [lilactown/hx "0.5.3"]]
 
   :plugins [[lein-shadow "0.2.0"]
             

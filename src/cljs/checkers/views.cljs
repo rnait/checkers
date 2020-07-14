@@ -3,7 +3,10 @@
   (:require
    [re-frame.core :as re-frame]
    [checkers.subs]
-   [checkers.helpers :as helpers]))
+   [checkers.helpers :as helpers]
+   [hx.react :as hx :refer [defnc]]
+   [react-spring :as  spring]
+   ))
 
 (defn cell_format? [row col]
   (let [cell_class (re-frame/subscribe [:cell_class row col])]
@@ -20,7 +23,7 @@
     (js/console.log (prn-str "clicked " @action_on_click))
     (if (= nil @action_on_click)
       (re-frame/dispatch ^:flush-dom [:show_piece_moves  row col])
-      (re-frame/dispatch ^:flush-dom [:execute_move @action_on_click])
+      (re-frame/dispatch ^:flush-dom [:execute_move @action_on_click]) ;TODO refactor this to send human_move
       )
     )) 
 
@@ -58,6 +61,11 @@
                                (for [col (range size)]
                                  ^{:key (str "cell" col " " row)} [:td
                                                                    [cell row col]])])]])
+(defnc AppComponent [{:keys [title]}]
+  (let [props (spring/useSpring (clj->js {:opacity 1 :from {:opacity 0}}))]
+    [:div
+     [spring/animated.div {:style props} title]]))
+
 (defn main-panel []
   (let [name (re-frame/subscribe [:name])
         myDb (re-frame/subscribe [:db])
@@ -66,7 +74,9 @@
         scoreB (re-frame/subscribe [:score "b"])]
     [:div
      [:h1 "Player turn " (if (= "b" @turn) "Blacks" "Whites") " score W: " (prn-str @scoreW) " B: " (prn-str @scoreB)]
+     (hx/f [AppComponent {:title "I will fade in"}])
      [grid 8]
+     
      [:button
       {:on-click (fn [e]
                    (js/console.log "boton clicked")

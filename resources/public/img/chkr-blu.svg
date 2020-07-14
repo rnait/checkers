@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Copyright 2017 mathsisfun.com -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="172.852"
+   height="172.852"
+   version="1.0"
+   id="svg251"
+   sodipodi:docname="chkr-blu.svg"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)">
+  <metadata
+     id="metadata255">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="640"
+     inkscape:window-height="480"
+     id="namedview253"
+     showgrid="false"
+     inkscape:current-layer="svg251" />
+  <defs
+     id="defs89">
+    <linearGradient
+       id="id4">
+      <stop
+         offset="0"
+         style="stop-color:white;stop-opacity:1"
+         id="stop39" />
+      <stop
+         offset="1"
+         style="stop-color:white;stop-opacity:0"
+         id="stop41" />
+    </linearGradient>
+    <linearGradient
+       id="id9">
+      <stop
+         offset="0"
+         style="stop-color:white;stop-opacity:0"
+         id="stop68" />
+      <stop
+         offset="1"
+         style="stop-color:black;stop-opacity:0.34"
+         id="stop70" />
+    </linearGradient>
+    <radialGradient
+       id="id26"
+       r="41"
+       fx="259"
+       fy="484.362"
+       cx="259"
+       cy="484.4"
+       gradientTransform="matrix(2.47267,0.701066,-0.63106,2.22581,-237.785,-1207.01)"
+       xlink:href="#id9"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       id="id39"
+       r="13.5"
+       fx="259.852"
+       fy="485.571"
+       cx="259.9"
+       cy="485.6"
+       gradientTransform="matrix(-0.352095,4.15599,-2.18119,-0.18789,1003.66,-905.687)"
+       xlink:href="#id4"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       id="id40"
+       gradientTransform="matrix(2.42024,0,0,3.16192,113.066,88.487)"
+       xlink:href="#id4"
+       x1="-11"
+       y1="-26"
+       x2="-11"
+       y2="1.4"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <circle
+     cx="86.426"
+     cy="86.426"
+     r="86.426"
+     style="fill:#02007f;stroke-width:0.44"
+     id="circle161" />
+  <circle
+     cx="86.426"
+     cy="86.426"
+     r="86.426"
+     style="fill:url(#id26);stroke-width:0.44"
+     id="circle163" />
+  <ellipse
+     cx="-146.955"
+     cy="83.0909"
+     rx="29.3002"
+     ry="56.4899"
+     transform="matrix(-0.04139,-0.999143,0.999171,-0.040707,0,0)"
+     style="opacity:0.5;fill:url(#id39);stroke-width:0.419032"
+     id="ellipse241" />
+  <circle
+     cx="86.326"
+     cy="92.026"
+     r="39.4081"
+     style="color:#000000;overflow:visible;fill:none;stroke:#204a87;stroke-width:5.25;stroke-linecap:round;stroke-opacity:0.96"
+     id="circle243" />
+  <ellipse
+     cx="86.426"
+     cy="47.426"
+     rx="65.3"
+     ry="41.1"
+     style="opacity:0.81;fill:url(#id40);stroke-width:0.44"
+     id="ellipse245" />
+</svg>

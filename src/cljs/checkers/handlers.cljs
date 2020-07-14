@@ -6,16 +6,16 @@
    [checkers.helpers :as helpers]
 ))
 (defn capture_piece_handler [cofx from to captureLoc]
-  {:db
-   (-> (:db cofx)
-       (helpers/inc_score_with_capture captureLoc)
-       (helpers/remove_piece captureLoc)
-       (helpers/move_piece from to)
-       helpers/end_move
-       (helpers/change_turn_or_show_mandatory_capture to)
-       helpers/switch_pawns_to_queens
-       (helpers/update_last_move :capture))
-   :dispatch ^:flush-dom [:auto-play "b"]})
+  (let [updatedDb (-> (:db cofx)
+                      (helpers/inc_score_with_capture captureLoc)
+                      (helpers/remove_piece captureLoc)
+                      (helpers/move_piece from to)
+                      helpers/end_move
+                      (helpers/change_turn_or_show_mandatory_capture to)
+                      helpers/switch_pawns_to_queens
+                      (helpers/update_last_move :capture))]
+       {:db updatedDb
+        }))
 
 (defn move_piece_handler [cofx from to]
   (if (= '() (helpers/possible_captures_all_pieces? (:db cofx)))
@@ -28,7 +28,6 @@
               helpers/switch_pawns_to_queens
               (helpers/update_last_move :move)
               )
-      :dispatch ^:flush-dom [:auto-play "b"]
       })
     (doall
      ;(js/console.log "can't move, capture is mandatory")
@@ -42,4 +41,12 @@
     (case (:typeOfMove move)
       :move (move_piece_handler cofx from to)
       :capture (capture_piece_handler cofx from to captureLocation)
-      :else cofx)))
+      nil cofx)))
+
+(defn show_piece_moves [db [row col]]
+  (let [moves (helpers/possible_moves? db [row col])
+        winner (helpers/winner? db)]
+    (if  (not= nil winner)
+      db
+      (helpers/show_moves db moves))))
+

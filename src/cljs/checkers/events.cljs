@@ -16,14 +16,14 @@
    (update-in db [:temp_layer [x y]] set/union #{:is-capturable})))
 
 
-(re-frame/reg-event-fx
+#_(re-frame/reg-event-fx
  :move_piece
  (fn [cofx [_ from to]]
    (handlers/move_piece_handler cofx from to)
    )) 
 
 
-(re-frame/reg-event-fx
+#_(re-frame/reg-event-fx
  :capture_piece 
  (fn [cofx [_ from to captureLoc]]
    (js/console.log (prn-str "capture " captureLoc " from piece from " from "to " to) )    
@@ -33,11 +33,15 @@
 (re-frame/reg-event-fx
  :execute_move
  (fn [cofx [_ move]]
-   (handlers/execute_move cofx move)))
+   (let [newCofx (handlers/execute_move cofx move)]
+     {:db (:db newCofx)
+      :dispatch ^:flush-dom [:auto-play "b"]}
+     )
+   ))
 (re-frame/reg-event-db
  :show_piece_moves
  (fn [db [_ row col ]]
-   (helpers/show_piece_moves db [row col])))
+   (handlers/show_piece_moves db [row col])))
 
 (re-frame/reg-event-db
  :start-app
@@ -89,27 +93,32 @@
          :capture [:capture_piece (:from move) (:to move) (:captureLocation move)] ))
       nil))
   )
-(defn auto_play_handler_minmax [cofx color]
-   (let [turn (:turn (:db cofx))
-         move (ai/get_best_move_minmax cofx color 2)]
-     (if (= turn color)
-       (doall
-        (js/console.log (prn-str "auto_play move:"
-                                 move))
-        (case (:typeOfMove move)
-          :move [:move_piece (:from move) (:to move)]
-          :capture [:capture_piece (:from move) (:to move) (:captureLocation move)]))
-       nil)))
+
+(defn auto_play [cofx color]
+  (let [move (ai/ai_best_move cofx color)
+        newCofx (handlers/execute_move cofx move)]
+    (if (= move nil) 
+      newCofx
+      (auto_play newCofx "b") ; black keeps moving if it's possible (capture still available)
+      )))
+
 (re-frame/reg-event-fx
  :auto-play
  (fn [cofx [_ color]]
-   (let [db (:db cofx)
-         move_event (auto_play_handler_minmax cofx color)]
-     (when (not= move_event nil)
-       {:dispatch move_event
-        })
-     )))
+   (let [newCofx (auto_play cofx color)
+         winner (helpers/winner? (:db newCofx))]
+     ;newCofx
+     (js/console.log (str "winner :" winner))
+     (if (= nil winner)
+       newCofx
+       {:db (:db newCofx) :dispatch [:winner winner]}))))
 
+(re-frame/reg-event-fx
+ :winner
+ (fn [cofx [_ winner]]
+   (js/alert (str "winner is " (case winner
+                                           "w" "Whites"
+                                           "b" "Blacks")))))
 (re-frame/reg-event-db 
  :add_piece 
  (fn [db [_ pos piece]]

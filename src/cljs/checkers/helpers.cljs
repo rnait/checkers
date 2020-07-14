@@ -39,6 +39,13 @@
   (case color
     "w" "b"
     "b" "w"))
+
+(defn winner? [db]
+  (cond 
+    (empty? (filter (fn [[k v]] (= "w" (:color v))) (:board db))) "b"
+    (empty? (filter (fn [[k v]] (= "b" (:color v))) (:board db))) "w"
+    :else nil)
+  )
 (defn inc_score [db color change]
   (let [scoreIndex (case color
                      "w" 0
@@ -205,10 +212,7 @@
           (assoc-in  [:temp_layer] (update_piece_moves  moves))
           (assoc-in  [:moving] (update_moving_handlers  moves))))))
 
-(defn show_piece_moves [db [row col]]
-  (let [moves (possible_moves? db [row col])]
-    (show_moves db moves)
-    ))
+
 
 
 (defn change_turn_or_show_mandatory_capture [db capturerPos]
@@ -224,3 +228,4 @@
                 (mapmap (:board db)  (fn [pos piece]
                                        (if (is_crownable? pos piece) {:name "q" :color (:color piece)}
                                            piece))))))
+
