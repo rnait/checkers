@@ -13,7 +13,7 @@
                       helpers/end_move
                       (helpers/change_turn_or_show_mandatory_capture to)
                       helpers/switch_pawns_to_queens
-                      (helpers/update_last_move :capture))]
+                      (helpers/update_last_move (helpers/build_capture_move from to captureLoc) ))]
        {:db updatedDb
         }))
 
@@ -26,7 +26,7 @@
               helpers/end_move
               helpers/change_turn
               helpers/switch_pawns_to_queens
-              (helpers/update_last_move :move)
+              (helpers/update_last_move (helpers/build_move from to))
               )
       })
     (doall

@@ -6,6 +6,7 @@
    [checkers.helpers :as helpers]
    [hx.react :as hx :refer [defnc]]
    [react-spring :as  spring]
+   [checkers.undointerceptor :as undo-intrcp]
    ))
 
 (defn cell_format? [row col]
@@ -72,37 +73,65 @@
         turn (re-frame/subscribe [:turn])
         scoreW (re-frame/subscribe [:score "w"])
         scoreB (re-frame/subscribe [:score "b"])]
-    [:div
-     [:h1 "Player turn " (if (= "b" @turn) "Blacks" "Whites") " score W: " (prn-str @scoreW) " B: " (prn-str @scoreB)]
-     (hx/f [AppComponent {:title "I will fade in"}])
-     [grid 8]
-     
-     [:button
-      {:on-click (fn [e]
-                   (js/console.log "boton clicked")
-                   (make_list_cells_movable '([1 3] [0 0])))}
-      "Test"]
-     [:button
-      {:on-click (fn [e]
-                   (js/console.log "boton Clear clicked")
-                   (re-frame/dispatch ^:flush-dom [:end_move]))}
-      "Clear Temp"]
-     [:button
-      {:on-click (fn [e]
-                   (js/console.log "boton random-event clicked")
-                   (re-frame/dispatch ^:flush-dom [:random-event]))}
-      "random event"]
-     [:button
-      {:on-click (fn [e]
-                   (js/console.log "boton show_piece_moves clicked")
-                   (re-frame/dispatch ^:flush-dom [:show_piece_moves]))}
-      "show_piece_moves"]
-     [:button
-      {:on-click (fn [e]
-                   (js/console.log "change score")
-                   (re-frame/dispatch ^:flush-dom [:inc_score [4 4] ]))}
-      "change score"]
-     [:br]
-     (prn-str @myDb)
-     [:br]
-     (prn-str "all possible captures " (helpers/possible_captures_all_pieces? @myDb))]))
+    [:div {:className "game"}
+     [:div
+      [:h1 "Player turn " (if (= "b" @turn) "Blacks" "Whites") " score W: " (prn-str @scoreW) " B: " (prn-str @scoreB)]
+      (hx/f [AppComponent {:title "I will fade in"}])
+      [grid 8]
+
+      [:button
+       {:on-click (fn [e]
+                    (js/console.log "boton clicked")
+                    (make_list_cells_movable '([1 3] [0 0])))}
+       "Test"]
+      [:button
+       {:on-click (fn [e]
+                    (js/console.log "boton Clear clicked")
+                    (re-frame/dispatch ^:flush-dom [:end_move]))}
+       "Clear Temp"]
+      [:button
+       {:on-click (fn [e]
+                    (js/console.log "boton random-event clicked")
+                    (re-frame/dispatch ^:flush-dom [:random-event]))}
+       "random event"]
+      [:button
+       {:on-click (fn [e]
+                    (js/console.log "boton show_piece_moves clicked")
+                    (re-frame/dispatch ^:flush-dom [:show_piece_moves]))}
+       "show_piece_moves"]
+      [:button
+       {:on-click (fn [e]
+                    (js/console.log "change score")
+                    (re-frame/dispatch ^:flush-dom [:inc_score [4 4]]))}
+       "change score"]
+      [:button
+       {:on-click (fn [e]
+                    (js/console.log "time shift")
+                    (re-frame/dispatch ^:flush-dom [:time_shift 3]))}
+       "time shift to 3"]
+      [:br]
+      (prn-str @myDb)
+      [:br]
+      (prn-str "all possible captures " (helpers/possible_captures_all_pieces? @myDb))
+      [:br]
+      (prn-str "undo-stack: " @undo-intrcp/history)]
+     #_(let [i (atom -1)]
+         (reduce
+          (fn [x y]
+            (let [step (swap! i inc)]
+              (into [] (merge x [:div (str  "move: " (- (count (:stack @undo-intrcp/history)) @i))
+                                 [:button
+                                  {:on-click (fn [e] (re-frame/dispatch ^:flush-dom [:time_shift step]))}
+                                  (str  (:score y))]]))))
+          [:div "Testage                                  a"]
+          (:stack @undo-intrcp/history)))
+     (let [i (atom -1)]
+       (into [] (concat [:div "testage "] (reverse (map (fn [x]
+                                                          (let [step (swap! i inc)]
+                                                            [:div (str  "move: "  @i)
+                                                             [:button
+                                                              {:on-click (fn [e] (re-frame/dispatch ^:flush-dom [:time_shift step]))}
+                                                              (str  (:score x))]]))
+                                                        (:stack @undo-intrcp/history))))))]
+    
+    )) 

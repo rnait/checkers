@@ -72,6 +72,15 @@
       (assoc-in  [:temp_layer] {})
       (assoc-in  [:moving] {})
       ))
+(defn build_move [from to]
+  {:from from
+   :to to
+   :typeOfMove :move})
+(defn build_capture_move [from to captureLocation]
+  {:from from
+   :to to
+   :typeOfMove :capture
+   :captureLocation captureLocation})
 (defn update_last_move [db move_name]
   (-> db
       (assoc-in  [:last_move] move_name)))
@@ -114,14 +123,9 @@
       ;(js/console.log (prn-str "1 " (valid_pos? from) "2 " (not (valid_pos? to)) "3 " (> 1 (count cellsOnDiag)) ) )
                            ;from here there cellsOnDiag has 0 or one element
                            (= 0 (count cellsOnDiag))
-                           (list {:from from
-                                  :to to
-                                  :typeOfMove :move}) ;free way to move
+                           (list (build_move from to)) ;free way to move
                            (= oponent (:color (first cellsOnDiag)))
-                           (list    {:from from
-                                     :to to
-                                     :typeOfMove :capture
-                                     :captureLocation (:pos (first cellsOnDiag))}) ;move with capturing
+                           (list (build_capture_move from to (:pos (first cellsOnDiag)))  ) ;move with capturing
                            )))
             (move_black_pawn [] (mapcat #(eval_move db [row col] %1) '([1 1] [1 -1] [2 2] [2 -2])))
             (move_white_pawn [] (mapcat #(eval_move db [row col] %1) '([-1 -1] [-1 1] [-2 -2] [-2 2])))

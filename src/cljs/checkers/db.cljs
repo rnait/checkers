@@ -26,5 +26,7 @@
    :temp_layer {}
    :turn "w"
    :moving {}
-   :last_move :move
+   :last_move  {:from [0 0]
+                :to [0 0]
+                :typeOfMove :move}
    })

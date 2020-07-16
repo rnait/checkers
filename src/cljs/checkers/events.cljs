@@ -7,6 +7,7 @@
    [checkers.helpers :as helpers]
    [checkers.ai :as ai]
    ;[day8.re-frame.tracing :refer-macros [fn-traced]]
+   [checkers.undointerceptor :as undo-intrcp]
    ))
 
 (re-frame/reg-event-db
@@ -32,6 +33,7 @@
 
 (re-frame/reg-event-fx
  :execute_move
+ [undo-intrcp/undo-interceptor]
  (fn [cofx [_ move]]
    (let [newCofx (handlers/execute_move cofx move)]
      {:db (:db newCofx)
@@ -104,6 +106,7 @@
 
 (re-frame/reg-event-fx
  :auto-play
+ [undo-intrcp/undo-interceptor]
  (fn [cofx [_ color]]
    (let [newCofx (auto_play cofx color)
          winner (helpers/winner? (:db newCofx))]
@@ -128,3 +131,11 @@
  :remove_piece
  (fn [db [_ pos ]]
    (helpers/remove_piece db pos)))
+
+(re-frame/reg-event-db
+ :time_shift
+ (fn [db [_ step]]
+   (undo-intrcp/switch_step_history step)
+   (let [stack (:stack @undo-intrcp/history)]
+     (js/console.log (prn-str stack))
+     (nth stack step))))

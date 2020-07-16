@@ -64,18 +64,19 @@
       (let [score
             (reduce (fn [[alpha beta best] move ]
                       (let [movedDb (handlers/execute_move cofx move)
-                            moveType   (:last_move movedDb)
+                            moveType   (:typeOfMove (:last_move (:db movedDb)))
                             newBest (compOperator 
                                      best
                                      (minimax_reduce
                                       movedDb
-                                      (if  (= moveType :capture) depth (dec depth)) 
+                                      (if  (= moveType :capture)  depth  (dec depth)) 
                                       alpha beta))
 
                             [newAlpha newBeta] (if (= player "w")
                                                  [(max newBest alpha) beta]
                                                  [alpha (min newBest beta)])]
                             ;(when (<= beta alpha) (js/console.log (prn-str "alpha " alpha " beta " beta " pruning")))
+                        ;(js/console.log (prn-str "move type: " moveType))
                         (if (<= beta alpha)
                           (reduced [newAlpha newBeta newBest]) 
                           [newAlpha newBeta newBest]
@@ -106,7 +107,7 @@
 
 (defn ai_best_move [cofx color]
   (let [turn (:turn (:db cofx))
-        move (get_best_move_minmax cofx color 4)]
+        move (get_best_move_minmax cofx color 2)]
     (if (= turn color)
       move
       #_(doall
